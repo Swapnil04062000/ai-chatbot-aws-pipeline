@@ -1,0 +1,25 @@
+# Secrets & API Keys (CRUCIAL)
+.env
+*.pem
+secrets.json
+
+# Local Python Environments & Caches
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local IDE Settings
+.vscode/
+.idea/
+
+# Large Docker/Log Files
+*.log
+
+# Experimental Python Files
+main11.py
+main_with_otel.py
+
+
