@@ -2,7 +2,6 @@ pipeline {
     agent any
     
     environment {
-        // Your exact 12-digit AWS Account ID and region metrics
         AWS_ACCOUNT_ID = '344367179698' 
         AWS_REGION     = 'us-east-1'
         ECR_REPO_NAME  = 'ai-chatbot-repo'
@@ -22,7 +21,6 @@ pipeline {
             steps {
                 echo 'Compiling project boundaries using multi-stage Docker & Astral uv...'
                 script {
-                    // Builds the image locally on your EC2 disk using the host's Docker engine
                     dockerImage = docker.build("${ECR_REGISTRY}/${ECR_REPO_NAME}:${IMAGE_TAG}")
                     sh "docker tag ${ECR_REGISTRY}/${ECR_REPO_NAME}:${IMAGE_TAG} ${ECR_REGISTRY}/${ECR_REPO_NAME}:latest"
                 }
@@ -31,13 +29,14 @@ pipeline {
         
         stage('Artifact Registry Push') {
             steps {
-                echo 'Logging into AWS ECR and pushing container images...'
+                echo 'Logging into AWS ECR using Instance Profile and pushing container images...'
                 script {
-                    // The Amazon ECR plugin manages authentication behind the scenes using your EC2 instance role
-                    docker.withRegistry("https://${ECR_REGISTRY}") {
-                        dockerImage.push()
-                        dockerImage.push('latest')
-                    }
+                    // Force a secure login token generation using the server's IAM role
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
+                    
+                    // Execute the clean push commands directly
+                    sh "docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${IMAGE_TAG}"
+                    sh "docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:latest"
                 }
             }
         }
