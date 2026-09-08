@@ -141,13 +141,42 @@ async def chat(request: ChatRequest):
 
         target_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
+        ######################
+
+        # try:
+        #     # Use our clean asynchronous context manager for the GenAI downstream call
+        #     async with chatbot_telemetry.trace_chat_call(target_model) as token_holder:
+        #         response = client.chat.completions.create(
+        #             model=target_model,
+        #             # messages=[{"role": m.role, "content": m.content} for m in request.messages],
+        #             messages=[{"role": str(m.role), "content": str(m.content)} for m in request.messages],
+        #         )
+                
+        #         # Pass usage metadata back to the telemetry context manager
+        #         if response.usage and token_holder:
+        #             token_holder["in"] = response.usage.prompt_tokens
+        #             token_holder["out"] = response.usage.completion_tokens
+
+        #         return {"message": response.choices[0].message.content or ""}
+
+        ##########################
+
         try:
+            # Convert Pydantic objects explicitly into clean Python dictionary literals
+            # This ensures that any model serialization artifacts are stripped out
+            openai_messages = [
+                {
+                    "role": str(m.role).strip().lower(), 
+                    "content": str(m.content)
+                } 
+                for m in request.messages
+            ]
+
             # Use our clean asynchronous context manager for the GenAI downstream call
             async with chatbot_telemetry.trace_chat_call(target_model) as token_holder:
                 response = client.chat.completions.create(
                     model=target_model,
-                    # messages=[{"role": m.role, "content": m.content} for m in request.messages],
-                    messages=[{"role": str(m.role), "content": str(m.content)} for m in request.messages],
+                    messages=openai_messages,  # Pass the sanitized list directly
                 )
                 
                 # Pass usage metadata back to the telemetry context manager
@@ -156,6 +185,7 @@ async def chat(request: ChatRequest):
                     token_holder["out"] = response.usage.completion_tokens
 
                 return {"message": response.choices[0].message.content or ""}
+
 
                 # target_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
