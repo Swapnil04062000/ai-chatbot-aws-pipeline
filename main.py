@@ -225,6 +225,8 @@ async def get_telemetry_stats():
 async def index():
     return FileResponse(STATIC_DIR / "index.html")
 
+print("adding force trigger")
+
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
