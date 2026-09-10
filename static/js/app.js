@@ -37,7 +37,7 @@ function generateUUID() {
 
 function createSession() {
   const session = {
-    id: crypto.generateUUID(),
+    id: generateUUID(),
     title: "New chat",
     messages: [],
   };
