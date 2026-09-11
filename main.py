@@ -18,6 +18,8 @@ from contextlib import asynccontextmanager
 
 load_dotenv()
 
+# print("")
+
 # Bootstrap OTel telemetry pipeline on startup
 # chatbot_telemetry.initialize()
 logger = logging.getLogger("chatbot_production")
