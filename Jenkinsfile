@@ -39,14 +39,6 @@ pipeline {
                     sh "docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:latest"
                 }
             }
-        }
-
-        stage('ECS Deployment') {
-            steps {
-                echo 'Triggering ECS service redeployment with the new image...'
-                sh "aws ecs update-service --cluster ${ECS_CLUSTER} --service ${ECS_SERVICE} --force-new-deployment --region ${AWS_REGION}"
-            }
-        }
     }
     
     post {
