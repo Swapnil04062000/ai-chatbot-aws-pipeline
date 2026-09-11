@@ -2,12 +2,14 @@ pipeline {
     agent any
     
     environment {
-        AWS_ACCOUNT_ID = '344367179698' 
-        AWS_REGION     = 'us-east-1'
-        ECR_REPO_NAME  = 'ai-chatbot-repo'
-        IMAGE_TAG      = "build-${BUILD_NUMBER}"
-        ECR_REGISTRY   = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-    }
+    AWS_ACCOUNT_ID = '344367179698' 
+    AWS_REGION     = 'us-east-1'
+    ECR_REPO_NAME  = 'ai-chatbot-repo'
+    IMAGE_TAG      = "build-${BUILD_NUMBER}"
+    ECR_REGISTRY   = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+    ECS_CLUSTER    = 'ai-chatbot-cluster'
+    ECS_SERVICE    = 'ai-chatbot-service'
+}
     
     stages {
         stage('Source Checkout') {
