@@ -40,6 +40,13 @@ pipeline {
                 }
             }
         }
+
+        stage('ECS Deployment') {
+            steps {
+                echo 'Triggering ECS service redeployment with the new image...'
+                sh "aws ecs update-service --cluster ${ECS_CLUSTER} --service ${ECS_SERVICE} --force-new-deployment --region ${AWS_REGION}"
+            }
+        }
     }
         
     
