@@ -39,7 +39,9 @@ pipeline {
                     sh "docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:latest"
                 }
             }
+        }
     }
+        
     
     post {
         success {
