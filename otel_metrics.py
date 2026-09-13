@@ -263,6 +263,47 @@ class ChatbotTelemetry:
         if len(self._chat_records) > self._max_records:
             self._chat_records.pop(0)
 
+    # @asynccontextmanager
+    # async def trace_chat_call(self, model: str):
+    #     """Async context manager to trace and measure LLM chatbot transactions"""
+    #     if not self._tracer:
+    #         yield None
+    #         return
+
+    #     with self._tracer.start_as_current_span("gen_ai.chat") as span:
+    #         span.set_attribute("gen_ai.system", "openai")
+    #         span.set_attribute("gen_ai.request.model", model)
+            
+    #         start_time = time.perf_counter()
+    #         success = True
+    #         tokens_in, tokens_out = 0, 0
+            
+    #         try:
+    #             # Provide custom context object to write tokens back from main app
+    #             ctx = {"set_tokens": lambda i, o: nonlocal_set(i, o)}
+    #             # Helper container for closure assignment
+    #             holder = {"in": 0, "out": 0}
+    #             def nonlocal_set(i, o):
+    #                 holder["in"] = i
+    #                 holder["out"] = o
+    #                 span.set_attribute("gen_ai.usage.input_tokens", i)
+    #                 span.set_attribute("gen_ai.usage.output_tokens", o)
+
+    #             yield holder
+    #             tokens_in, tokens_out = holder["in"], holder["out"]
+    #         except Exception as exc:
+    #             success = False
+    #             span.record_exception(exc)
+    #             span.set_status(trace.StatusCode.ERROR, str(exc))
+    #             raise
+    #         finally:
+    #             latency_ms = (time.perf_counter() - start_time) * 1000
+    #             span.set_attribute("gen_ai.response.latency", latency_ms)
+    #             self.record_chat_metrics(model, latency_ms, success, tokens_in, tokens_out)
+
+
+    ###################################
+
     @asynccontextmanager
     async def trace_chat_call(self, model: str):
         """Async context manager to trace and measure LLM chatbot transactions"""
@@ -276,27 +317,20 @@ class ChatbotTelemetry:
             
             start_time = time.perf_counter()
             success = True
-            tokens_in, tokens_out = 0, 0
+            holder = {"in": 0, "out": 0}
             
             try:
-                # Provide custom context object to write tokens back from main app
-                ctx = {"set_tokens": lambda i, o: nonlocal_set(i, o)}
-                # Helper container for closure assignment
-                holder = {"in": 0, "out": 0}
-                def nonlocal_set(i, o):
-                    holder["in"] = i
-                    holder["out"] = o
-                    span.set_attribute("gen_ai.usage.input_tokens", i)
-                    span.set_attribute("gen_ai.usage.output_tokens", o)
-
                 yield holder
-                tokens_in, tokens_out = holder["in"], holder["out"]
             except Exception as exc:
                 success = False
                 span.record_exception(exc)
                 span.set_status(trace.StatusCode.ERROR, str(exc))
                 raise
             finally:
+                tokens_in, tokens_out = holder["in"], holder["out"]
+                span.set_attribute("gen_ai.usage.input_tokens", tokens_in)
+                span.set_attribute("gen_ai.usage.output_tokens", tokens_out)
+
                 latency_ms = (time.perf_counter() - start_time) * 1000
                 span.set_attribute("gen_ai.response.latency", latency_ms)
                 self.record_chat_metrics(model, latency_ms, success, tokens_in, tokens_out)
