@@ -129,28 +129,59 @@ class ChatbotTelemetry:
         # self._register_instruments()
         # logger.info("OTel Chatbot Telemetry initialized successfully.")
 
-        # 2. Setup Tracing Provider with Console Span Exporter
-        from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
+        #######################################################################
+
+        # 2. Setup Tracing Provider with OTLP exporter (to ADOT collector sidecar)
         trace_provider = TracerProvider(resource=resource)
-        # SimpleSpanProcessor prints traces to console immediately as they finish
-        trace_provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
+        try:
+            span_exporter = OTLPSpanExporter(endpoint=self.otlp_endpoint, insecure=True)
+            trace_provider.add_span_processor(BatchSpanProcessor(span_exporter))
+            logger.info(f"OTLP trace exporter connected to {self.otlp_endpoint}")
+        except Exception as e:
+            logger.warning(f"Failed to bind OTLP trace exporter: {e}")
         trace.set_tracer_provider(trace_provider)
         self._tracer = trace.get_tracer(__name__)
 
-        # 3. Setup Metrics Provider with Console Metric Exporter
-        readers = [
-            PeriodicExportingMetricReader(
-                ConsoleMetricExporter(), 
-                export_interval_millis=self.export_interval_ms
-            )
-        ]
+        # 3. Setup Metrics Provider with OTLP exporter (fallback to console if it fails)
+        readers = []
+        try:
+            metric_exporter = OTLPMetricExporterGRPC(endpoint=self.otlp_endpoint, insecure=True)
+            readers.append(PeriodicExportingMetricReader(metric_exporter, export_interval_millis=self.export_interval_ms))
+        except Exception:
+            readers.append(PeriodicExportingMetricReader(ConsoleMetricExporter(), export_interval_millis=self.export_interval_ms))
 
         meter_provider = MeterProvider(resource=resource, metric_readers=readers)
         metrics.set_meter_provider(meter_provider)
         self._meter = metrics.get_meter(__name__)
 
         self._register_instruments()
-        logger.info("OTel Chatbot Telemetry initialized with Console Exporters (AWS-ready stdout mode).")
+        logger.info(f"OTel Chatbot Telemetry initialized with OTLP exporter targeting {self.otlp_endpoint}")
+
+
+        #######################################################################
+
+        # # 2. Setup Tracing Provider with Console Span Exporter
+        # from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
+        # trace_provider = TracerProvider(resource=resource)
+        # # SimpleSpanProcessor prints traces to console immediately as they finish
+        # trace_provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
+        # trace.set_tracer_provider(trace_provider)
+        # self._tracer = trace.get_tracer(__name__)
+
+        # # 3. Setup Metrics Provider with Console Metric Exporter
+        # readers = [
+        #     PeriodicExportingMetricReader(
+        #         ConsoleMetricExporter(), 
+        #         export_interval_millis=self.export_interval_ms
+        #     )
+        # ]
+
+        # meter_provider = MeterProvider(resource=resource, metric_readers=readers)
+        # metrics.set_meter_provider(meter_provider)
+        # self._meter = metrics.get_meter(__name__)
+
+        # self._register_instruments()
+        # logger.info("OTel Chatbot Telemetry initialized with Console Exporters (AWS-ready stdout mode).")
 
 
     def _register_instruments(self) -> None:
