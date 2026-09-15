@@ -304,6 +304,39 @@ class ChatbotTelemetry:
 
     ###################################
 
+    # @asynccontextmanager
+    # async def trace_chat_call(self, model: str):
+    #     """Async context manager to trace and measure LLM chatbot transactions"""
+    #     if not self._tracer:
+    #         yield None
+    #         return
+
+    #     with self._tracer.start_as_current_span("gen_ai.chat") as span:
+    #         span.set_attribute("gen_ai.system", "openai")
+    #         span.set_attribute("gen_ai.request.model", model)
+            
+    #         start_time = time.perf_counter()
+    #         success = True
+    #         holder = {"in": 0, "out": 0}
+            
+    #         try:
+    #             yield holder
+    #         except Exception as exc:
+    #             success = False
+    #             span.record_exception(exc)
+    #             span.set_status(trace.StatusCode.ERROR, str(exc))
+    #             raise
+    #         finally:
+    #             tokens_in, tokens_out = holder["in"], holder["out"]
+    #             span.set_attribute("gen_ai.usage.input_tokens", tokens_in)
+    #             span.set_attribute("gen_ai.usage.output_tokens", tokens_out)
+
+    #             latency_ms = (time.perf_counter() - start_time) * 1000
+    #             span.set_attribute("gen_ai.response.latency", latency_ms)
+    #             self.record_chat_metrics(model, latency_ms, success, tokens_in, tokens_out)
+
+
+########################################################
     @asynccontextmanager
     async def trace_chat_call(self, model: str):
         """Async context manager to trace and measure LLM chatbot transactions"""
