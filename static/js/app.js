@@ -133,7 +133,10 @@ async function sendMessage(text) {
   try {
     const res = await fetch("/api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",
+                 "X-Session-Id": session.id
+       },
+      
       body: JSON.stringify({ messages: session.messages }),
     });
 

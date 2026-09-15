@@ -2,7 +2,7 @@ import os
 import logging
 from pathlib import Path
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
@@ -124,7 +124,7 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, x_session_id: str = Header(default="unknown")):
     if not request.messages:
         raise HTTPException(status_code=400, detail="Messages are required")
 
@@ -136,6 +136,7 @@ async def chat(request: ChatRequest):
     # Trace the full HTTP endpoint lifecycle
     with tracer.start_as_current_span("http_chat_endpoint") as parent_span:
         parent_span.set_attribute("http.route", "/api/chat")
+        parent_span.set_attribute("session.id", x_session_id)
 
         if client is None:
             last_user = next((m.content for m in reversed(request.messages) if m.role == "user"), "")
@@ -175,7 +176,7 @@ async def chat(request: ChatRequest):
             ]
 
             # Use our clean asynchronous context manager for the GenAI downstream call
-            async with chatbot_telemetry.trace_chat_call(target_model) as token_holder:
+            async with chatbot_telemetry.trace_chat_call(target_model, session_id=x_session_id) as token_holder:
                 response = client.chat.completions.create(
                     model=target_model,
                     messages=openai_messages,  # Pass the sanitized list directly
