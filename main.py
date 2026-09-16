@@ -136,7 +136,7 @@ async def chat(request: ChatRequest, x_session_id: str = Header(default="unknown
     # Trace the full HTTP endpoint lifecycle
     with tracer.start_as_current_span("http_chat_endpoint") as parent_span:
         parent_span.set_attribute("http.route", "/api/chat")
-        parent_span.set_attribute("session.id", x_session_id)
+        parent_span.set_attribute("session_id", x_session_id)
 
         if client is None:
             last_user = next((m.content for m in reversed(request.messages) if m.role == "user"), "")
