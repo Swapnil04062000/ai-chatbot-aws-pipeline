@@ -28,7 +28,9 @@ pipeline {
                 }
             }
         }
-        
+
+
+  
         stage('Artifact Registry Push') {
             steps {
                 echo 'Logging into AWS ECR using Instance Profile and pushing container images...'
@@ -42,6 +44,23 @@ pipeline {
                 }
             }
         }
+
+        stage('Build OTel Collector Image') {
+            steps {
+                echo 'Building custom OTel collector image with baked-in config...'
+                script {
+                    sh "docker build -f Dockerfile.otel -t ${ECR_REGISTRY}/ai-chatbot-otel-collector:${IMAGE_TAG} ."
+                    sh "docker tag ${ECR_REGISTRY}/ai-chatbot-otel-collector:${IMAGE_TAG} ${ECR_REGISTRY}/ai-chatbot-otel-collector:latest"
+                }
+            }
+        }
+        stage('Push OTel Collector Image') {
+            steps {
+                sh "docker push ${ECR_REGISTRY}/ai-chatbot-otel-collector:${IMAGE_TAG}"
+                sh "docker push ${ECR_REGISTRY}/ai-chatbot-otel-collector:latest"
+            }
+        }
+      
 
         stage('ECS Deployment') {
             steps {
