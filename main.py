@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from openai import OpenAI
+from openai import AsyncOpenAI
+
 from pydantic import BaseModel
 
 # Import our dedicated production telemetry engine
@@ -88,7 +89,7 @@ async def lifespan(app: FastAPI):
     base_url = os.getenv("OPENAI_BASE_URL")
     if api_key:
         try:
-            client = OpenAI(api_key=api_key, base_url=base_url)
+            client = AsyncOpenAI(api_key=api_key, base_url=base_url)
             logger.info("OpenAI Client successfully loaded.")
            
         except Exception as e:
@@ -177,7 +178,7 @@ async def chat(request: ChatRequest, x_session_id: str = Header(default="unknown
 
             # Use our clean asynchronous context manager for the GenAI downstream call
             async with chatbot_telemetry.trace_chat_call(target_model, session_id=x_session_id) as token_holder:
-                response = client.chat.completions.create(
+                response = await client.chat.completions.create(
                     model=target_model,
                     messages=openai_messages,  # Pass the sanitized list directly
                 )
