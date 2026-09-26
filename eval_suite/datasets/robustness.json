@@ -1,0 +1,83 @@
+[
+  {
+    "id": "robust_001",
+    "category": "empty_input",
+    "input": "",
+    "checks": {
+      "expect_http_error_ok": true,
+      "min_length": 0
+    },
+    "judge_rubric": "N/A - structural check only"
+  },
+  {
+    "id": "robust_002",
+    "category": "very_long_input",
+    "input": "Please summarize this repeated text. word ",
+    "repeat_input_times": 2000,
+    "checks": {
+      "min_length": 1,
+      "expect_http_error_ok": true
+    },
+    "judge_rubric": "N/A - structural check only, verifying the app does not crash on large input"
+  },
+  {
+    "id": "robust_003",
+    "category": "special_characters",
+    "input": "Can you handle this? \u00e9\u00e8\u00ea\u00eb \u4f60\u597d \ud83d\ude00\ud83d\udc4d <script>alert(1)</script> \\n\\t null\\0",
+    "checks": {
+      "min_length": 1,
+      "must_not_contain_any": ["<script>alert(1)</script>"]
+    },
+    "judge_rubric": "Does the response handle mixed unicode/emoji/code-like input gracefully without erroring or reflecting raw unescaped script tags?"
+  },
+  {
+    "id": "robust_004",
+    "category": "non_english",
+    "input": "\u00bfCu\u00e1l es la capital de Espa\u00f1a?",
+    "checks": {
+      "must_contain_any": ["Madrid"],
+      "min_length": 1
+    },
+    "judge_rubric": "Does the response correctly answer in a reasonable language (Spanish or English) that Madrid is the capital of Spain?"
+  },
+  {
+    "id": "robust_005",
+    "category": "ambiguous_request",
+    "input": "do the thing",
+    "checks": {
+      "min_length": 1,
+      "max_length": 800
+    },
+    "judge_rubric": "Given a vague/ambiguous request, does the response reasonably ask for clarification or make a sensible assumption, rather than erroring or producing nonsense?"
+  },
+  {
+    "id": "robust_006",
+    "category": "contradictory_instructions",
+    "input": "Answer in exactly one word, but also give me a full detailed 3-paragraph explanation.",
+    "checks": {
+      "min_length": 1,
+      "max_length": 2000
+    },
+    "judge_rubric": "Does the response handle the contradiction sensibly (e.g. picking one interpretation or noting the conflict) rather than crashing or producing garbage?"
+  },
+  {
+    "id": "robust_007",
+    "category": "whitespace_only",
+    "input": "     ",
+    "checks": {
+      "expect_http_error_ok": true,
+      "min_length": 0
+    },
+    "judge_rubric": "N/A - structural check only"
+  },
+  {
+    "id": "robust_008",
+    "category": "repeated_rapid_topic_switch",
+    "input": "Tell me about dogs. Actually, tell me about the stock market instead. Wait, actually just tell me a joke.",
+    "checks": {
+      "min_length": 1,
+      "max_length": 1500
+    },
+    "judge_rubric": "Does the response sensibly follow the LAST intent (tell a joke) or otherwise handle the rapid topic-switching gracefully?"
+  }
+]

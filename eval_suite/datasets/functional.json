@@ -1,0 +1,84 @@
+[
+  {
+    "id": "func_001",
+    "category": "factual_qa",
+    "input": "What is the capital of France?",
+    "checks": {
+      "must_contain_any": ["Paris"],
+      "min_length": 3,
+      "max_length": 500
+    },
+    "judge_rubric": "Does the response correctly and concisely state that Paris is the capital of France?"
+  },
+  {
+    "id": "func_002",
+    "category": "factual_qa",
+    "input": "What is 15 multiplied by 8?",
+    "checks": {
+      "must_contain_any": ["120"],
+      "min_length": 1,
+      "max_length": 500
+    },
+    "judge_rubric": "Does the response correctly compute 15 x 8 = 120?"
+  },
+  {
+    "id": "func_003",
+    "category": "instruction_following",
+    "input": "List exactly 3 primary colors, one per line, nothing else.",
+    "checks": {
+      "must_contain_any": ["red", "Red"],
+      "line_count_between": [3, 6]
+    },
+    "judge_rubric": "Does the response list exactly 3 primary colors (red, blue, yellow) in a clean list format, without extra commentary?"
+  },
+  {
+    "id": "func_004",
+    "category": "reasoning",
+    "input": "If a train leaves at 3pm and travels for 2 hours 30 minutes, what time does it arrive?",
+    "checks": {
+      "must_contain_any": ["5:30", "17:30", "5:30 PM", "5:30pm"],
+      "min_length": 3
+    },
+    "judge_rubric": "Does the response correctly compute the arrival time as 5:30 PM and show the reasoning?"
+  },
+  {
+    "id": "func_005",
+    "category": "coding",
+    "input": "Write a Python function that returns the square of a number.",
+    "checks": {
+      "must_contain_any": ["def ", "return"],
+      "must_contain_any_2": ["**2", "* n", "*x", "pow("]
+    },
+    "judge_rubric": "Does the response provide syntactically valid Python code that correctly squares a number?"
+  },
+  {
+    "id": "func_006",
+    "category": "summarization",
+    "input": "Summarize in one sentence: The Amazon rainforest, spanning over 5.5 million square kilometers across nine countries, is the largest tropical rainforest on Earth and plays a critical role in regulating global climate by absorbing carbon dioxide.",
+    "checks": {
+      "must_contain_any": ["Amazon", "rainforest"],
+      "max_length": 400
+    },
+    "judge_rubric": "Is the response a faithful, concise one-sentence summary that preserves the key facts (size, largest tropical rainforest, climate role) without introducing new information?"
+  },
+  {
+    "id": "func_007",
+    "category": "conversational_memory",
+    "input": "My name is Alex. What is 2 plus 2?",
+    "checks": {
+      "must_contain_any": ["4"],
+      "min_length": 1
+    },
+    "judge_rubric": "Does the response correctly answer 4, regardless of whether it also acknowledges the name?"
+  },
+  {
+    "id": "func_008",
+    "category": "empty_or_trivial",
+    "input": "Hi",
+    "checks": {
+      "min_length": 1,
+      "max_length": 800
+    },
+    "judge_rubric": "Is this a reasonable, on-topic greeting response (not an error, not empty, not wildly off-topic)?"
+  }
+]

@@ -24,3 +24,6 @@ opentelemetry-instrumentation-logging>=0.46b0
 opentelemetry-instrumentation-system-metrics>=0.46b0
 google-cloud-aiplatform[agent-engines,adk]>=1.82.0
 google-genai>=0.1.1
+langgraph==1.2.12
+langchain-core==1.6.4
+langchain-openai==1.6.3
